@@ -1,4 +1,5 @@
 Ticket master deployment
+<<<<<<< HEAD
 
 # Deployment process
 
@@ -35,3 +36,5 @@ sudo docker ps -a
 Step-8
 ==> Check docker logs
 sudo docker logs {container_id}
+=======
+>>>>>>> 31255f2c352d93f2e6e4504617eb4a1da54dad42
