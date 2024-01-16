@@ -12,11 +12,14 @@ import pandas as pd
 
 IPROYAL_USER = os.environ.get('IPROYAL_USER')
 IPROYAL_PASS = os.environ.get('IPROYAL_PW')
+print(IPROYAL_USER, IPROYAL_PASS)
 
-# ips proxy settings
-ips = {
+# IPROYAL proxy settings
+iproyal = {
     'http': f'http://geo.iproyal.com:12321:{IPROYAL_USER}:{IPROYAL_PASS}'
 }
+
+print(iproyal)
 
 app = Flask(__name__)
 app.config["output_li"] = []
@@ -29,7 +32,7 @@ app.config["SECRET_KEY"] = "sdfsf65416534sdfsdf4653"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 secure_type = "http"
 
-def make_ticket_request(url, event):
+def make_tickermaster_request(url):
     try:
         querystring = {
             "show":"listpricerange",
@@ -56,12 +59,13 @@ def make_ticket_request(url, event):
             }
         flag = True
         while flag:
-            response = requests.request("GET", url, proxies= ips, headers=headers, data=payload, params=querystring)
+            print("get reponse not correct")
+            response = requests.request("GET", url, proxies= iproyal, headers=headers, data=payload, params=querystring)
             response_text =  json.loads(response.text)
             meta_value = response_text.get("title", "nothing")
             if meta_value!="403 Internal Error" and meta_value!="It's not you - it's us":
+                print("get reponse correct")
                 app.config["output_li"].append(response_text)
-                print(response_text)
                 flag=False
 
     except Exception as e:
@@ -127,14 +131,17 @@ def ticketmaster():
 
         start_time = time.time()
         data = list(df["event_id"])
+        print(data)
 
         for ev in data:
+            print(ev)
             url = f"https://offeradapter.ticketmaster.com/api/ismds/event/{ev}/facets"
-            threads.append(executor.submit(make_ticket_request, url, ev))
+            threads.append(executor.submit(make_tickermaster_request, url, ev))
 
         concurrent.futures.wait(threads)
 
         json_data = app.config["output_li"]
+        print(json_data)
         with open("result.json", "w") as json_file_dump:
             json.dump(json_data, json_file_dump)
         print(f"total time {time.time()-start_time}")
@@ -168,7 +175,3 @@ def download_logs():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80)
-
-
-#where is ip creds
-#Time should be less than 30 secs
