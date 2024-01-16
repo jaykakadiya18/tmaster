@@ -13,8 +13,8 @@ import pandas as pd
 IPROYAL_USER = os.environ.get('IPROYAL_USER')
 IPROYAL_PASS = os.environ.get('IPROYAL_PW')
 
-# Tor proxy settings
-tor_proxy = {
+# ips proxy settings
+ips = {
     'http': f'http://geo.iproyal.com:12321:{IPROYAL_USER}:{IPROYAL_PASS}'
 }
 
@@ -29,7 +29,7 @@ app.config["SECRET_KEY"] = "sdfsf65416534sdfsdf4653"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 secure_type = "http"
 
-def make_tor_request(url, event):
+def make_ticket_request(url, event):
     try:
         querystring = {
             "show":"listpricerange",
@@ -56,7 +56,7 @@ def make_tor_request(url, event):
             }
         flag = True
         while flag:
-            response = requests.request("GET", url, proxies= tor_proxy, headers=headers, data=payload, params=querystring)
+            response = requests.request("GET", url, proxies= ips, headers=headers, data=payload, params=querystring)
             response_text =  json.loads(response.text)
             meta_value = response_text.get("title", "nothing")
             if meta_value!="403 Internal Error" and meta_value!="It's not you - it's us":
@@ -130,7 +130,7 @@ def ticketmaster():
 
         for ev in data:
             url = f"https://offeradapter.ticketmaster.com/api/ismds/event/{ev}/facets"
-            threads.append(executor.submit(make_tor_request, url, ev))
+            threads.append(executor.submit(make_ticket_request, url, ev))
 
         concurrent.futures.wait(threads)
 
@@ -168,3 +168,7 @@ def download_logs():
 
 if __name__ == "__main__":
     app.run()
+
+
+#where is ip creds
+#Time should be less than 30 secs
